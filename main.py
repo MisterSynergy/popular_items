@@ -311,8 +311,7 @@ def make_wikitext(qid_list:list[str], image:Optional[tuple[str,str]]) -> str:
 
 
 def write_to_wiki(wikitext:str) -> None:
-    print(wikitext)
-
+    #print(wikitext)
     site = pwb.Site('wikidata', 'wikidata')
     page = pwb.Page(site, PAGE_TITLE)
     page.text = wikitext
