@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: msynbot.popular-items
+  labels:
+    name: msynbot.popular-items
+    # The toolforge=tool label will cause $HOME and other paths to be mounted from Toolforge
+    toolforge: tool
+spec:
+  schedule: "41 1 * * *"
+  successfulJobsHistoryLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            toolforge: tool
+        spec:
+          containers:
+          - name: popular-items
+            image: docker-registry.tools.wmflabs.org/toolforge-python39-sssd-base:latest
+            workingDir: /data/project/msynbot/pywikibot_tasks/popular_items
+            command: [ venv/bin/python3 ]
+            args: [ main.py ]
+            env:
+            - name: HOME
+              value: /data/project/msynbot
+            - name: PYTHONPATH
+              value: /data/project/shared/pywikibot/stable
+          restartPolicy: OnFailure
