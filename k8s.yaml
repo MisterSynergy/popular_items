@@ -19,6 +19,11 @@ spec:
           containers:
           - name: popular-items
             image: docker-registry.tools.wmflabs.org/toolforge-python39-sssd-base:latest
+            resources:
+              requests:
+                memory: "2Gi"
+              limits:
+                memory: "2Gi"
             workingDir: /data/project/msynbot/pywikibot_tasks/popular_items
             command: [ venv/bin/python3 ]
             args: [ main.py ]
