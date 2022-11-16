@@ -303,7 +303,7 @@ def make_wikitext(qid_list:list[str], image:Optional[tuple[str,str]]) -> str:
 
     img_qid_text = { img_qid : ' ({{I18n|pictured}})' }
     body = '\n'.join([ f'* {{{{Q|{qid}}}}}{img_qid_text.get(qid, "")}' for qid in qid_list])
-    footer = '<span style="clear: {{dir|{{{lang|{{int:lang}}}}}|left|right}};"></span>'
+    footer = '<span style="clear: {{dir|{{{lang|{{int:lang}}}}}|left|right}};"></span><noinclude>[[Category:Wikidata:Main Page]]</noinclude>'
 
     wikitext = f'{img_header}{body}{footer}'
 
