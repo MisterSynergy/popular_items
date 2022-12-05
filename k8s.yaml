@@ -7,7 +7,7 @@ metadata:
     # The toolforge=tool label will cause $HOME and other paths to be mounted from Toolforge
     toolforge: tool
 spec:
-  schedule: "41 1 * * *"
+  schedule: "41 0 * * *"
   successfulJobsHistoryLimit: 0
   jobTemplate:
     spec:
@@ -21,9 +21,11 @@ spec:
             image: docker-registry.tools.wmflabs.org/toolforge-python39-sssd-base:latest
             resources:
               requests:
-                memory: "2Gi"
+                memory: "1500Mi"
+                cpu: "200m"
               limits:
-                memory: "2Gi"
+                memory: "1500Mi"
+                cpu: "200m"
             workingDir: /data/project/msynbot/pywikibot_tasks/popular_items
             command: [ venv/bin/python3 ]
             args: [ main.py ]
@@ -32,4 +34,4 @@ spec:
               value: /data/project/msynbot
             - name: PYTHONPATH
               value: /data/project/shared/pywikibot/stable
-          restartPolicy: OnFailure
+          restartPolicy: Never
