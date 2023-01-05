@@ -21,10 +21,10 @@ spec:
             image: docker-registry.tools.wmflabs.org/toolforge-python39-sssd-base:latest
             resources:
               requests:
-                memory: "1500Mi"
+                memory: "2000Mi"
                 cpu: "200m"
               limits:
-                memory: "1500Mi"
+                memory: "2000Mi"
                 cpu: "200m"
             workingDir: /data/project/msynbot/pywikibot_tasks/popular_items
             command: [ venv/bin/python3 ]
