@@ -295,13 +295,15 @@ def get_displayable_items() -> list[str]:
 
 
 def make_wikitext(qid_list:list[str], image:Optional[tuple[str,str]]) -> str:
+    img_qid_text:dict[str, str] = {}
+
     if not image:
         img_header = '<nowiki />\n'
     else:
         img_qid, img_source = image
+        img_qid_text[img_qid] = ' ({{I18n|pictured}})'
         img_header = f'<span style="float: {{{{dir|{{{{{{lang|{{{{int:lang}}}}}}}}}}|left|right}}}}; padding-top: 0.5em; padding-{{{{dir|{{{{{{lang|{{{{int:lang}}}}}}}}}}|right|left}}}}: 0.5em;">[[File:{img_source}|100px]]</span>\n'
 
-    img_qid_text = { img_qid : ' ({{I18n|pictured}})' }
     body = '\n'.join([ f'* {{{{Q|{qid}}}}}{img_qid_text.get(qid, "")}' for qid in qid_list])
     footer = '<span style="clear: {{dir|{{{lang|{{int:lang}}}}}|left|right}};"></span><noinclude>[[Category:Wikidata:Main Page]]</noinclude>'
 
