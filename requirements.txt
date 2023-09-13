@@ -1,6 +1,7 @@
 certifi==2022.6.15
 charset-normalizer==2.1.0
 idna==3.3
+mariadb==1.0.11
 mysql-connector-python==8.0.29
 numpy==1.23.2
 pandas==1.4.3

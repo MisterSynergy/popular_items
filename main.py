@@ -5,7 +5,7 @@ from time import sleep
 from typing import Any, Optional
 from urllib.parse import unquote
 
-from mysql.connector import MySQLConnection
+import mariadb
 import pandas as pd
 import requests
 
@@ -20,7 +20,7 @@ WDQS_HEADERS = {
 REPLICA_PARAMS = {
     'host' : 'wikidatawiki.analytics.db.svc.wikimedia.cloud',
     'database' : 'wikidatawiki_p',
-    'option_files' : f'{expanduser("~")}/replica.my.cnf'
+    'default_file' : f'{expanduser("~")}/replica.my.cnf'
 }
 
 BLACKLIST_SANDBOX = [  # Sandbox and Tour items
@@ -53,8 +53,8 @@ LIMIT = 7  # max number of items listed on popular page
 
 class Replica:
     def __init__(self):
-        self.replica = MySQLConnection(**REPLICA_PARAMS)
-        self.cursor = self.replica.cursor()
+        self.replica = mariadb.connect(**REPLICA_PARAMS)
+        self.cursor = self.replica.cursor(dictionary=True)
 
 
     def __enter__(self):
@@ -67,7 +67,7 @@ class Replica:
 
 
     @staticmethod
-    def query_mediawiki(query:str) -> list[tuple]:
+    def query_mediawiki(query:str) -> list[dict[str, Any]]:
         with Replica() as cursor:
             cursor.execute(query)
             result = cursor.fetchall()
@@ -76,21 +76,12 @@ class Replica:
 
 
     @staticmethod
-    def query_mediawiki_to_dataframe(query:str, columns:list[str]) -> pd.DataFrame:
+    def query_mediawiki_to_dataframe(query:str) -> pd.DataFrame:
         result = Replica.query_mediawiki(query)
 
         df = pd.DataFrame(
-            data=result,
-            columns=columns
+            data=result
         )
-
-        if df.shape[0] > 0:
-            # this is nasty; TODO: what happens if there is a nan value in the zeroth row?
-            for column in df.columns:
-                if isinstance(df.loc[0, column], bytearray):
-                    df[column] = df[column].str.decode('utf8')
-                if isinstance(df.loc[0, column], bytes):
-                    df[column] = df[column].str.decode('utf8')
 
         return df
 
@@ -158,8 +149,8 @@ def query_revisions() -> pd.DataFrame:
 
     query = f"""SELECT
   rc_id,
-  rc_title,
-  comment_text,
+  CONVERT(rc_title USING utf8) AS qid,
+  CONVERT(comment_text USING utf8) AS edit_summary,
   actor_id
 FROM
   recentchanges
@@ -174,21 +165,14 @@ WHERE
   AND rc_source='mw.edit'
   AND rc_timestamp>{start_timestamp}"""
 
-    columns = [
-        'rc_id',
-        'qid',
-        'edit_summary',
-        'actor_id'
-    ]
-
-    df = Replica.query_mediawiki_to_dataframe(query, columns)
+    df = Replica.query_mediawiki_to_dataframe(query)
     return df
 
 
 def query_change_tags(min_rc_id:int) -> pd.DataFrame:
     query = f"""SELECT
   rc_id,
-  ctd_name
+  CONVERT(ctd_name USING utf8) AS tag_name
 FROM
   recentchanges
     JOIN change_tag ON rc_id=ct_rc_id
@@ -196,19 +180,15 @@ FROM
 WHERE
   rc_id>={min_rc_id:d}
 """
-    columns = [
-        'rc_id',
-        'tag_name'
-    ]
 
-    df = Replica.query_mediawiki_to_dataframe(query, columns)
+    df = Replica.query_mediawiki_to_dataframe(query)
 
     return df
 
 
 def query_currently_listed_items() -> list[str]:
     query = f"""SELECT
-  pl_title
+  CONVERT(pl_title USING utf8) AS pl_title
 FROM
   pagelinks
     JOIN page ON pl_from=page_id
@@ -218,7 +198,7 @@ WHERE
   AND pl_namespace=0"""
 
     result = Replica.query_mediawiki(query)
-    currently_listed_items = [ tpl[0].decode('utf8') for tpl in result ]
+    currently_listed_items = [ dct.get('pl_title', '') for dct in result ]
 
     return currently_listed_items
 
