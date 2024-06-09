@@ -199,7 +199,7 @@ WHERE
   AND lt_namespace=0"""
 
     result = Replica.query_mediawiki(query)
-    currently_listed_items = [ dct.get('pl_title', '') for dct in result ]
+    currently_listed_items = [ dct.get('lt_title', '') for dct in result ]
 
     return currently_listed_items
 
