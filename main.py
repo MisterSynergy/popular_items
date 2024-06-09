@@ -188,14 +188,15 @@ WHERE
 
 def query_currently_listed_items() -> list[str]:
     query = f"""SELECT
-  CONVERT(pl_title USING utf8) AS pl_title
+  CONVERT(lt_title USING utf8) AS lt_title
 FROM
   pagelinks
     JOIN page ON pl_from=page_id
+	JOIN linktarget ON pl_target_id=lt_id
 WHERE
   page_namespace={PAGE_NAMESPACE:d}
   AND page_title='{PAGE_TITLE_WITHOUT_NS}'
-  AND pl_namespace=0"""
+  AND lt_namespace=0"""
 
     result = Replica.query_mediawiki(query)
     currently_listed_items = [ dct.get('pl_title', '') for dct in result ]
