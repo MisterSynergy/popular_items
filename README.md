@@ -6,4 +6,4 @@ This is a replacement script for the [popularItems.py](https://github.com/Pascal
 The Wikidata page edited by this bot is [Wikidata:Main Page/Popular](https://www.wikidata.org/wiki/Wikidata:Main_Page/Popular).
 
 ## Technical requirements
-This bot is currently not scheduled to run regularly. It is, however, available on [Toolforge](https://wikitech.wikimedia.org/wiki/Portal:Toolforge) in the `msynbot` tool account in order to be kicked-off if necessary. It depends on the [shared pywikibot files](https://wikitech.wikimedia.org/wiki/Help:Toolforge/Pywikibot#Using_the_shared_Pywikibot_files_(recommended_setup)) and is running in a Kubernetes environment using Python 3.11.2.
+This bot is currently not scheduled to run regularly. It is, however, available on [Toolforge](https://wikitech.wikimedia.org/wiki/Portal:Toolforge) in the `msynbot` tool account in order to be kicked-off if necessary. It depends on the [shared pywikibot files](https://wikitech.wikimedia.org/wiki/Help:Toolforge/Pywikibot#Using_the_shared_Pywikibot_files_(recommended_setup)) and is running in a Kubernetes environment using Python 3.13.5.
