@@ -44,6 +44,7 @@ BLACKLIST_TECHNICAL = [
 
 PAGE_TITLE = 'Wikidata:Main Page/Popular'
 PAGE_TITLE_WITHOUT_NS = 'Main_Page/Popular'
+REQUESTS_FOR_DELETIONS_PAGE = 'Requests_for_deletions'
 PAGE_NAMESPACE = 4
 
 DAYS = 3  # number of days to consider
@@ -204,6 +205,27 @@ WHERE
     return currently_listed_items
 
 
+def query_items_on_deletion_requests(qids:list[str]) -> set[str]:
+    if not qids:
+        return set()
+
+    quoted_qids = ','.join(f"'{qid}'" for qid in qids)
+    query = f"""SELECT
+  CONVERT(lt_title USING utf8) AS lt_title
+FROM
+  pagelinks
+    JOIN page ON pl_from=page_id
+    JOIN linktarget ON pl_target_id=lt_id
+WHERE
+  page_namespace={PAGE_NAMESPACE:d}
+  AND page_title='{REQUESTS_FOR_DELETIONS_PAGE}'
+  AND lt_namespace=0
+  AND lt_title IN ({quoted_qids})"""
+
+    result = Replica.query_mediawiki(query)
+    return { dct.get('lt_title', '') for dct in result }
+
+
 def get_displayable_items() -> list[str]:
     revisions = query_revisions()
     change_tags = query_change_tags(revisions['rc_id'].min())
@@ -264,10 +286,14 @@ def get_displayable_items() -> list[str]:
     df['blacklist_sandbox'] = df['qid'].isin(BLACKLIST_SANDBOX)
     df['blacklist_previous'] = df['qid'].isin(query_currently_listed_items())
     df['blacklist_technical'] = df['qid'].apply(func=query_technical_item)
+    df['blacklist_deletion_requests'] = df['qid'].isin(
+        query_items_on_deletion_requests(df['qid'].tolist())
+    )
 
     blacklist_filter = (df['blacklist_sandbox'] == False) \
                      & (df['blacklist_previous'] == False) \
-                     & (df['blacklist_technical'] == False)
+                     & (df['blacklist_technical'] == False) \
+                     & (df['blacklist_deletion_requests'] == False)
 
     # remove blacklisted items and limit to LIMIT members (number of displayed items)
     df = df.loc[blacklist_filter].head(LIMIT)
